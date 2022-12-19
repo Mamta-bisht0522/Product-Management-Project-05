@@ -1,0 +1,27 @@
+{
+  "name": "productmanagement",
+  "version": "1.0.0",
+  "description": "This is 5th project ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dhreetiman/ProductManagement.git"
+  },
+  "author": "Dhreetiman Prasad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dhreetiman/ProductManagement/issues"
+  },
+  "homepage": "https://github.com/Dhreetiman/ProductManagement#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1277.0",
+    "bcrypt": "^5.1.0",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.8.0",
+    "multer": "^1.4.5-lts.1"
+  }
+}
