@@ -167,7 +167,7 @@ const userLogin = async function (req, res) {
 
 
 
-//<<<===================== This function is used for Get Data of User =====================>>>//
+//===================== This function is used for Get Data of User =====================//
 const getUser = async function (req, res) {
 
     try {
@@ -175,12 +175,12 @@ const getUser = async function (req, res) {
         let userId = req.params.userId
         let tokenUserId = req.token.payload.userId
 
-        //===================== Checking the userId is Valid or Not by Mongoose =====================//
+        //----------------- Checking the userId is Valid or Not ------------------//
         if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })
 
         if (userId !== tokenUserId) { return res.status(403).send({ status: false, message: "You are not Authorized to get User Details." }) }
 
-        //x=====================Fetching All Data from Book DB=====================x//
+        //----------------------Fetching All Data from Book DB------------------------//
         let getUser = await userModel.findOne({ _id: userId })
         if (!getUser) return res.status(404).send({ status: false, message: "User Data Not Found" })
 
@@ -196,7 +196,7 @@ const getUser = async function (req, res) {
 
 
 
-//<<<===================== This function is used for Update the User =====================>>>//
+//===================== [function used for Update the User] =====================//
 const updateUserData = async function (req, res) {
 
     try {
@@ -205,18 +205,16 @@ const updateUserData = async function (req, res) {
         let files = req.files
         let userId = req.params.userId
 
-        //===================== Destructuring User Body Data =====================//
         let { fname, lname, email, phone, password, address, ...rest } = data
 
-        //=====================Checking User input is Present or Not =====================//
+        //--------------- Checking User input is Present or Not --------------------//
         if (!(validator.checkInputsPresent(data)) && !(files)) return res.status(400).send({ status: false, message: "Atleast one field required for Update(i.e. fname or lname or email or profileImage or phone or password or address)!" });
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can enter only fname or lname or email or profileImage or phone or password or address." }) }
 
 
-        //===================== Create a Object =====================//
         let obj = {}
 
-        //<<<===================== Validation of Given Credentials of User and Store the value in OBJ =====================>>>//
+        //---------------------- Validation of Given Credentials of User -----------------//
         if (fname) {
             if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
             obj.fname = fname
@@ -238,7 +236,7 @@ const updateUserData = async function (req, res) {
             obj.password = await bcrypt.hash(password, saltRounds)
         }
 
-        //===================== Checking the File is present or not and Create S3 Link =====================//
+        //----------------------- Checking the File is present or not and Create S3 Link ----------------------//
         if (files && files.length > 0) {
             if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Update!" })
             if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
@@ -246,7 +244,7 @@ const updateUserData = async function (req, res) {
             obj.profileImage = uploadedURL
         }
 
-        //===================== Validation of Shipping Address and Store the value in OBJ =====================//
+        //----------------- Validation of Shipping Address ------------------//
         if (address) {
             let { shipping, billing } = address
 
@@ -262,7 +260,7 @@ const updateUserData = async function (req, res) {
                 }
             }
 
-            //===================== Validation of Billing Address and Store the value in OBJ =====================//
+            //--------------------- Validation of Billing Address ----------------------//
             if (billing) {
                 if (billing.street) { obj['address.billing.street'] = billing.street }
                 if (billing.city) {
@@ -276,8 +274,6 @@ const updateUserData = async function (req, res) {
             }
         }
 
-
-        //x===================== Final Updation of User Document =====================x//
         let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: obj }, { new: true })
 
         if (!updateUser) { return res.status(200).send({ status: true, message: "User not exist with this UserId." }) }
@@ -292,6 +288,4 @@ const updateUserData = async function (req, res) {
 }
 
 
-
-//===================== Module Export =====================//
 module.exports = { createUser, userLogin, getUser, updateUserData }
