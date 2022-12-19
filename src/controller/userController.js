@@ -145,12 +145,7 @@ const userLogin = async function (req, res) {
 
         if (checkPassword) {
 
-            let payload = {
-                userId: userData['_id'].toString()
-                
-            }
-
-            const token = JWT.sign({ payload }, "shhh", { expiresIn: 60 * 60 });
+            const token = JWT.sign({ userId: userData['_id'].toString() }, "shhh", { expiresIn: 60 * 60 });
 
             //--------------------- Create a Object for Response ----------------------//
             let obj = { userId: userData['_id'], token: token }

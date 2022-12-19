@@ -12,8 +12,9 @@ const Authentication = async (req, res, next) => {
 
         //===================== Check Presence of Key with Value in Header =====================//
         let token = req.headers['authorization']
+        // console.log(token)
         if (!token) { return res.status(400).send({ status: false, message: "Token must be Present." }) }
-        token = token.slice(7)
+        token = token.slice(7) //removing Bearer with one whitespace from token
         //===================== Verify token & asigning it's value in request body =====================//
         JWT.verify(token, "shhh", function (error, decodedToken) {
             if (error) {
