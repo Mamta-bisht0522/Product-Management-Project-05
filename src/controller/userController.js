@@ -2,7 +2,6 @@
 const userModel = require('../model/userModel')
 const JWT = require('jsonwebtoken')
 const bcrypt = require("bcrypt")
-const saltRounds = 10
 const uploadFile = require('../aws/aws')
 const validator = require('../validator/validator')
 
@@ -77,7 +76,7 @@ const createUser = async (req, res) => {
 
 
         //---------------------- Encrept the password by thye help of Bcrypt -----------------------//
-        data.password = await bcrypt.hash(password, saltRounds)
+        data.password = await bcrypt.hash(password, 10)
 
 
         //------------------------ Fetching data of Email from DB and Checking Duplicate Email or Phone is Present or Not ---------------//
@@ -173,7 +172,7 @@ const getUser = async function (req, res) {
     try {
 
         let userId = req.params.userId
-        let tokenUserId = req.token.payload.userId
+        let tokenUserId = req.token
 
         //----------------- Checking the userId is Valid or Not ------------------//
         if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })
@@ -233,7 +232,7 @@ const updateUserData = async function (req, res) {
         }
         if (password) {
             if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "password should be have minimum 8 character and max 15 character" }) }
-            obj.password = await bcrypt.hash(password, saltRounds)
+            obj.password = await bcrypt.hash(password, 10)
         }
 
         //----------------------- Checking the File is present or not and Create S3 Link ----------------------//
@@ -279,7 +278,7 @@ const updateUserData = async function (req, res) {
         if (!updateUser) { return res.status(200).send({ status: true, message: "User not exist with this UserId." }) }
 
 
-        return res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
+        return res.status(200).send({ status: true, message: "User profile has been updated", data: updateUser })
 
     } catch (error) {
 

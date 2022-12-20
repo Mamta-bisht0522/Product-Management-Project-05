@@ -19,7 +19,8 @@ const Authentication = async (req, res, next) => {
             if (error) {
                 return res.status(401).send({ status: false, message: "Invalid Token." })
             } else {
-                req.token = decodedToken
+                req.token = decodedToken.userId
+                // console.log(req.token)
                 next()
             }
         })
@@ -47,7 +48,7 @@ const Authorization = async (req, res, next) => {
         if (!userData) return res.status(404).send({ status: false, message: "User Does Not Exist" })
 
         //---------------------- Checking the userId is Authorized Person or Not ----------------//
-        if (userData['_id'].toString() !== req.token.payload.userId) {
+        if (userData['_id'].toString() !== req.token) {
             return res.status(403).send({ status: false, message: "Unauthorized User Access!" })
         }
 

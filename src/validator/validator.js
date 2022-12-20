@@ -38,6 +38,8 @@ const isValidPin = (value) => { return (/^[1-9][0-9]{5}$/).test(value) }
 
 const isValidObjectId = (value) => { return mongoose.isValidObjectId(value) }
 
+const isValidImage = (value) => { return (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/).test(value) }
+
 
 
 
@@ -54,4 +56,5 @@ module.exports = {
     isValidpassword,
     isValidCity,
     isValidPin,
+    isValidImage
 }
