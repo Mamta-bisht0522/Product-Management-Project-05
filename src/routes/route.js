@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Authentication, Authorization } = require('../middleware/auth')
 const { createUser, userLogin, getUser, updateUserData } = require('../controller/userController')
+const {createProduct, getProduct, getProductById} = require('../controller/productController')
 
 
 router.get("/test", function (req, res){
@@ -9,16 +10,19 @@ router.get("/test", function (req, res){
 })
 
 
-
-//===================== User Registration (Post API) =====================//
 router.post("/register", createUser)
-//===================== User Login (Post API) =====================//
+
 router.post("/login", userLogin)
-//===================== Get User Data (Get API) =====================//
+
 router.get("/user/:userId/profile", Authentication, getUser)
-//===================== Update User Data (Put API) =====================//
+
 router.put("/user/:userId/profile", Authentication, Authorization, updateUserData)
-//============================================================================//
+
+router.post("/products", createProduct)
+
+router.get("/products", getProduct)
+
+router.get("/products/:productId", getProductById)
 
 
 router.all("/**",  (req, res) => {

@@ -19,84 +19,77 @@ const createUser = async (req, res) => {
         
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
-        //--------------------- Checking User Body Data ---------------------//
-        if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "No data found from body! You need to put the Mandatory Fields (i.e. fname, lname, email, profileImage, phone, password & address). " });
-        if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can input only fname, lname, email, profileImage, phone, password & address." }) }
+        //--------------------- Checking Mandotory Field ---------------------//
+        if (!validator.checkInput(data)) return res.status(400).send({ status: false, message: "Body cannot be empty. please Provide Mandatory Fields (i.e. fname, lname, email, profileImage, phone, password & address). " });
+        if (validator.checkInput(rest)) { return res.status(400).send({ status: false, message: "Only fname, lname, email, profileImage, phone, password & address should be present" }) }
 
         if (!address || address == '') return res.status(400).send({ status: false, message: "Please give the User Address." })
 
-        //--------------------- Convert from JSON String to JSON Object of Address ----------------------//
-        data.address = JSON.parse(address)
+        data.address = JSON.parse(address) //Convert from JSON String to JSON Object of Address
 
-        if (!validator.isValidBody(data.address)) return res.status(400).send({ status: false, message: "Address should be in object and must contain shipping and billing addresses" });
+        if (!validator.isValidInput(data.address)) return res.status(400).send({ status: false, message: "Address should be in object and must contain shipping and billing addresses" });
 
-        //----------------------- Destructuring Address from Object Data ---------------------//
+        
         let { shipping, billing } = data.address
 
 
-        //-------------------- Validation of Data --------------------------//
-        if (!validator.isValidBody(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
+        //-------------------- Validations --------------------------//
+        if (!validator.isValidInput(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
         if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
 
-        if (!validator.isValidBody(lname)) { return res.status(400).send({ status: false, message: 'Please enter lname' }) }
+        if (!validator.isValidInput(lname)) { return res.status(400).send({ status: false, message: 'Please enter lname' }) }
         if (!validator.isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in Alphabets' }) }
 
-        if (!validator.isValidBody(email)) { return res.status(400).send({ status: false, message: 'Please enter the EmailId' }) }
+        if (!validator.isValidInput(email)) { return res.status(400).send({ status: false, message: 'Please enter the EmailId' }) }
         if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: 'Please enter valid emailId' }) }
 
-        if (!validator.isValidBody(phone)) { return res.status(400).send({ status: false, message: 'Please enter the Mobile Number' }) }
+        if (!validator.isValidInput(phone)) { return res.status(400).send({ status: false, message: 'Please enter the Mobile Number' }) }
         if (!validator.isValidMobileNumber(phone)) { return res.status(400).send({ status: false, message: 'Please enter valid Mobile Number' }) }
 
-        if (!validator.isValidBody(password)) { return res.status(400).send({ status: false, message: 'Please enter the password' }) }
+        if (!validator.isValidInput(password)) { return res.status(400).send({ status: false, message: 'Please enter the password' }) }
         if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "To make strong Password Should be use 8 to 15 Characters which including letters, atleast one special character and at least one Number." }) }
 
-
-        //---------------------- Validation of Shipping Address ---------------------//
         if (!shipping) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
 
-        if (!validator.isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
+        if (!validator.isValidInput(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
 
-        if (!validator.isValidBody(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
+        if (!validator.isValidInput(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
         if (!validator.isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
 
-        if (!validator.isValidBody(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
+        if (!validator.isValidInput(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
         if (!validator.isValidPin(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
 
-
-        //------------------------- Validation of Billing Address ------------------------//
         if (!billing) return res.status(400).send({ status: false, message: "Enter Billing Address." })
 
-        if (!validator.isValidBody(billing.street)) { return res.status(400).send({ status: false, message: 'Please enter billing street' }) }
+        if (!validator.isValidInput(billing.street)) { return res.status(400).send({ status: false, message: 'Please enter billing street' }) }
 
-        if (!validator.isValidBody(billing.city)) { return res.status(400).send({ status: false, message: 'Please enter billing city' }) }
+        if (!validator.isValidInput(billing.city)) { return res.status(400).send({ status: false, message: 'Please enter billing city' }) }
         if (!validator.isValidCity(billing.city)) { return res.status(400).send({ status: false, message: 'Invalid billing city' }) }
 
-        if (!validator.isValidBody(billing.pincode)) { return res.status(400).send({ status: false, message: 'Please enter billing pin' }) }
+        if (!validator.isValidInput(billing.pincode)) { return res.status(400).send({ status: false, message: 'Please enter billing pin' }) }
         if (!validator.isValidPin(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
 
-
-        //---------------------- Encrept the password by thye help of Bcrypt -----------------------//
-        data.password = await bcrypt.hash(password, 10)
+        data.password = await bcrypt.hash(password, 10) //Encrepting the password using Bcrypt
 
 
-        //------------------------ Fetching data of Email from DB and Checking Duplicate Email or Phone is Present or Not ---------------//
+        //------------------------ Checking the given Email or Phone is already Present or Not ---------------//
         const isDuplicateEmail = await userModel.findOne({ $or: [{ email: email }, { phone: phone }] })
         if (isDuplicateEmail) {
-            if (isDuplicateEmail.email == email) { return res.status(400).send({ status: false, message: `This EmailId: ${email} is already exist!` }) }
-            if (isDuplicateEmail.phone == phone) { return res.status(400).send({ status: false, message: `This Phone No.: ${phone} is already exist!` }) }
+            if (isDuplicateEmail.email == email) { return res.status(400).send({ status: false, message: `Provided EmailId: ${email} is already exist!` }) }
+            if (isDuplicateEmail.phone == phone) { return res.status(400).send({ status: false, message: `Provied Phone No.: ${phone} is already exist!` }) }
         }
 
 
-        //----------------------- Checking the File is present or not and Create S3 Link ----------------------//
+        //----------------------- Checking the File is present or not and Creating S3 Link ----------------------//
         if (files && files.length > 0) {
 
-            if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Create!" })
-            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
+            if (files.length > 1) return res.status(400).send({ status: false, message: "More than one File cannot be accepted" })
+            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "Please provide image file only" }) }
 
             data.profileImage = await uploadFile(files[0])
         }
         else {
-            return res.status(400).send({ msg: "Please put image to create registration!" })
+            return res.status(400).send({status: false, message: "Please provide image to complete profile" })
         }
 
 
@@ -124,18 +117,18 @@ const userLogin = async function (req, res) {
 
         let { email, password, ...rest } = data
 
-        //------------------- Checking User input is Present or Not ------------------//
-        if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "You have to input email and password." });
-        if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can enter only email and password." }) }
+        //------------------- Checking Mandotory Field ------------------//
+        if (!validator.checkInput(data)) return res.status(400).send({ status: false, message: "You have to input email and password." });
+        if (validator.checkInput(rest)) { return res.status(400).send({ status: false, message: "You can enter only email and password." }) }
 
-        //------------------------- Validating Email and Password -----------------//
-        if (!validator.isValidBody(email)) return res.status(400).send({ status: false, message: "EmailId required to login" })
-        if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: "Invalid EmailID Format or Please input all letters in lowercase." }) }
+        //------------------------- Validations -----------------//
+        if (!validator.isValidInput(email)) return res.status(400).send({ status: false, message: "EmailId required to login" })
+        if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: "Invalid EmailID. Please input all letters in lowercase." }) }
 
-        if (!validator.isValidBody(password)) return res.status(400).send({ status: false, message: "Password required to login" })
-        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "Invalid Password Format! Password Should be 8 to 15 Characters and have a mixture of uppercase and lowercase letters and contain one symbol and then at least one Number." }) }
+        if (!validator.isValidInput(password)) return res.status(400).send({ status: false, message: "Password required to login" })
+        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "Invalid Password Format. password should be have minimum 8 character and max 15 character and must contains one uppar alphabet, one lower alphabet and one special character " }) }
 
-        //-------------------- Fetch Data from DB -------------------//
+        //-------------------- Fetching user's Data from DB -------------------//
         const userData = await userModel.findOne({ email: email })
         if (!userData) { return res.status(401).send({ status: false, message: "Invalid Login Credentials! You need to register first." }) }
 
@@ -146,14 +139,13 @@ const userLogin = async function (req, res) {
 
             const token = JWT.sign({ userId: userData['_id'].toString() }, "shhh", { expiresIn: 60 * 60 });
 
-            //--------------------- Create a Object for Response ----------------------//
             let obj = { userId: userData['_id'], token: token }
 
             return res.status(200).send({ status: true, message: 'User login successfull', data: obj })
 
         } else {
 
-            return res.status(401).send({ status: false, message: 'Wrong Password' })
+            return res.status(401).send({ status: false, message: 'incorrect Password' })
         }
 
     } catch (error) {
@@ -175,11 +167,11 @@ const getUser = async function (req, res) {
         let tokenUserId = req.token
 
         //----------------- Checking the userId is Valid or Not ------------------//
-        if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })
+        if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Given UserId: ${userId} is not Valid` })
 
-        if (userId !== tokenUserId) { return res.status(403).send({ status: false, message: "You are not Authorized to get User Details." }) }
+        if (userId !== tokenUserId) { return res.status(403).send({ status: false, message: "Not authorized to get User Details." }) }
 
-        //----------------------Fetching All Data from Book DB------------------------//
+        //----------------------Fetching user's data ------------------------//
         let getUser = await userModel.findOne({ _id: userId })
         if (!getUser) return res.status(404).send({ status: false, message: "User Data Not Found" })
 
@@ -206,14 +198,14 @@ const updateUserData = async function (req, res) {
 
         let { fname, lname, email, phone, password, address, ...rest } = data
 
-        //--------------- Checking User input is Present or Not --------------------//
-        if (!(validator.checkInputsPresent(data)) && !(files)) return res.status(400).send({ status: false, message: "Atleast one field required for Update(i.e. fname or lname or email or profileImage or phone or password or address)!" });
-        if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can enter only fname or lname or email or profileImage or phone or password or address." }) }
+        //--------------- Checking Mandotory Field --------------------//
+        if (!(validator.checkInput(data)) && !(files)) return res.status(400).send({ status: false, message: "Atleast select one field Update from the list: (fname or lname or email or profileImage or phone or password or address)" });
+        if (validator.checkInput(rest)) { return res.status(400).send({ status: false, message: "Provide only fname or lname or email or profileImage or phone or password or address." }) }
 
 
         let obj = {}
 
-        //---------------------- Validation of Given Credentials of User -----------------//
+        //---------------------- Validations -----------------//
         if (fname) {
             if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
             obj.fname = fname
@@ -231,11 +223,11 @@ const updateUserData = async function (req, res) {
             obj.phone = phone
         }
         if (password) {
-            if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "password should be have minimum 8 character and max 15 character" }) }
+            if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "password should be have minimum 8 character and max 15 character and must contains one uppar alphabet, one lower alphabet and one special character" }) }
             obj.password = await bcrypt.hash(password, 10)
         }
 
-        //----------------------- Checking the File is present or not and Create S3 Link ----------------------//
+        //----------------------- Checking the File is present or not and Creating S3 Link ----------------------//
         if (files && files.length > 0) {
             if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Update!" })
             if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
