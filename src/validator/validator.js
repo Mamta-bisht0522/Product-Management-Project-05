@@ -65,18 +65,5 @@ const isValidImage = (value) => {
 
 
 module.exports = {
-    checkInput,
-    isValidObjectId,
-    isValidInput,
-    isValidName,
-    isValidMobileNumber,
-    isValidEmail,
-    isValidpassword,
-    isValidCity,
-    isValidPin,
-    isValidProdName,
-    isValidPrice,
-    isValidInstallment,
-    isValidImage,
-
+    checkInput, isValidObjectId, isValidInput, isValidName, isValidMobileNumber, isValidEmail, isValidpassword, isValidCity, isValidPin, isValidProdName, isValidPrice, isValidInstallment, isValidImage,
 }

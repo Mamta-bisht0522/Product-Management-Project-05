@@ -41,7 +41,7 @@ const Authorization = async (req, res, next) => {
         let userId = req.params.userId
 
         //------------------- Checking the userId is Valid or Not ----------------------//
-        if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `This UserId: ${userId} is not valid!` })
+        if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Provided UserId: ${userId} is not valid!` })
 
         //---------------------- Fetching All User Data from DB ---------------------//
         let userData = await userModel.findById(userId)

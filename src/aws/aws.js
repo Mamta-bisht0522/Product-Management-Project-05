@@ -7,7 +7,7 @@ AWS.config.update({
     region: "ap-south-1"
 })
 
-//<===================== [function for Generate AWS S3 Link of File] =====================//
+//===================== [function for Generate AWS S3 Link of File] =====================//
 let uploadFile = async (file) => {
     return new Promise(function (resolve, reject) {
         let s3 = new AWS.S3({ apiVersion: '2006-03-01' });
@@ -19,12 +19,10 @@ let uploadFile = async (file) => {
             Body: file.buffer
         }
 
-
         s3.upload(uploadParams, function (err, data) {
             if (err) {
                 return reject({ "error": err })
             }
-            // console.log(data)
             console.log("File Uploaded Succesfully")
             return resolve(data.Location)
         })

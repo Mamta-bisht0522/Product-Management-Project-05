@@ -14,7 +14,7 @@ const createProduct = async (req, res) => {
 
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage, ...rest } = data
 
-        //------------------- Checking Mandotory Field ----------------------//
+        //------------------- Checking Mandatory Field ----------------------//
         if (!validator.checkInput(data)) return res.status(400).send({ status: false, message: "Body cannot be empty. Please Provide the Mandatory Fields (i.e. title, description, price, currencyId, currencyFormat, productImage ). " });
         if (validator.checkInput(rest)) { return res.status(400).send({ status: false, message: "INVALID INPUT... input only title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments." }) }
 
@@ -108,7 +108,7 @@ const getProduct = async (req, res) => {
 
         let { size, name, priceGreaterThan, priceLessThan, priceSort, ...rest } = data
 
-        //----------------- Checking Mandotory Field -----------------//
+        //----------------- Checking Mandatory Field -----------------//
         if (validator.checkInput(rest)) { return res.status(400).send({ status: false, message: "You can input only size, name, priceGreaterThan, priceLessThan, priceSort" }) }
 
         if (!validator.checkInput(data)) {
@@ -117,25 +117,35 @@ const getProduct = async (req, res) => {
             return res.status(200).send({ status: true, message: "Success", data: productData });
         }
 
+        let obj = { isDeleted: false }
+
         //------------------ Validations --------------------//
         if (size || size == '') {
             if (!validator.isValidInput(size)) return res.status(400).send({ status: false, message: "Please enter Size" });    
-            if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size)) return res.status(400).send({ status: false, message: "INVALID INPUT... Select one of these given size option: (S , XS, M, X, L, XXL, XL)" });    
+            if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size)) return res.status(400).send({ status: false, message: "INVALID INPUT... Select one of these given size option: (S , XS, M, X, L, XXL, XL)" });
+            obj.availableSizes = { $all: size }
         }
 
         if (name || name == '') {
             if (!validator.isValidInput(name)) { return res.status(400).send({ status: false, message: "Please enter name" }) }
-            if (!validator.isValidProdName(name)) { return res.status(400).send({ status: false, message: "INVALID INPUT... Please provid valid name" }) }
+            if (!validator.isValidProdName(name)) { return res.status(400).send({ status: false, message: "INVALID INPUT... Please provid valid name" })}
+            obj.title = { $regex: name }
         }
 
         if (priceGreaterThan || priceGreaterThan == '') {
             if (!validator.isValidInput(priceGreaterThan)) return res.status(400).send({ status: false, message: "Please enter Price Greater Than" });
             if (!validator.isValidPrice(priceGreaterThan)) return res.status(400).send({ status: false, message: "priceGreaterThan must be number" });
+            obj.price = { $gt: priceGreaterThan }
         }
 
         if (priceLessThan || priceLessThan == '') {
-            if (!validator.isValidInput(priceLessThan)) return res.status(400).send({ status: false, message: "Please enter Price Lesser Than" });
-            if (!validator.isValidPrice(priceLessThan)) return res.status(400).send({ status: false, message: "priceLessThan must be number" });
+            if (!validator.isValidInput(priceLessThan)) return res.status(400).send({ status: false, message: "Please enter Price Lesser Than" })
+            if (!validator.isValidPrice(priceLessThan)) return res.status(400).send({ status: false, message: "priceLessThan must be number" })
+            obj.price = { $lt: priceLessThan }
+        }
+
+        if (priceGreaterThan && priceLessThan) {
+            obj.price = { $gt: priceGreaterThan, $lt: priceLessThan }
         }
 
         if (priceSort || priceSort == '') {
@@ -143,7 +153,7 @@ const getProduct = async (req, res) => {
         }
 
         //--------------- Fetching All Data from Product DB ----------------//
-        let getProduct = await productModel.find({isDeleted: false, title: {$regex: data.name}, price: {$gt: data.priceGreaterThan, $lt: data.priceLessThan}, availableSizes: { $all: data.size} }).sort({ price: priceSort })
+        let getProduct = await productModel.find(obj).sort({ price: priceSort })
 
         //--------------- Checking Data is Present or Not in DB --------------//
         if (getProduct.length == 0) return res.status(404).send({ status: false, message: "Product Not Found." })
@@ -157,7 +167,7 @@ const getProduct = async (req, res) => {
 }
 
 
-//===================== [function for Get Data of Products By Path Param =====================//
+//===================== [function for Get Data of Products By Path Param] =====================//
 const getProductById = async (req, res) => {
 
     try {
@@ -176,6 +186,133 @@ const getProductById = async (req, res) => {
     }
 }
 
+//===================== [function for Update Product's Data] =====================//
+
+const updateProduct = async (req, res) => {
+
+    try {
+
+        let data = req.body
+        let files = req.files
+        let productId = req.params.productId
+
+        let { title, description, price, isFreeShipping, style, availableSizes, installments, productImage, ...rest } = data
+
+        //------------- Checking the ProductId is Valid or Not --------------//
+
+        if (!validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: `Please Enter Valid ProductId: ${productId}` })
+
+        //--------------- Checking Mandatory Fields ---------------//
+
+        if (!validator.checkInput(data) && !(files)) return res.status(400).send({ status: false, message: "Select at least one field to update from the list: (title, description, price, isFreeShipping, style, availableSizes, installments, productImage). " });
+
+        if (validator.checkInput(rest)) { return res.status(400).send({ status: false, message: "Only title, description, price, isFreeShipping, style, availableSizes, installments and productImage can be updated" }) }
+
+        let obj = {}
+
+        //------------------- Validations ----------------------//
+
+        if (title || title == '') {
+
+            if (!validator.isValidInput(title)) { return res.status(400).send({ status: false, message: "Please enter title" }) }
+            if (!validator.isValidProdName(title)) { return res.status(400).send({ status: false, message: "Please mention valid title In Body" }) }
+
+            //------------ checking Product Title is already Present or Not -------------//
+            let isDuplicateTitle = await productModel.findOne({ title: title });
+
+            if (isDuplicateTitle) {
+
+                return res.status(400).send({ status: false, message: "Title Already Exist, provide an unique title" });
+            }
+
+            obj.title = title
+        }
+
+        //---------------- Validations ---------------//
+
+        if (description || description == '') {
+            if (!validator.isValidInput(description)) return res.status(400).send({ status: false, message: "Please enter description" });
+
+            obj.description = description
+        }
+
+        if (price || price == '') {
+
+            if (!validator.isValidInput(price)) return res.status(400).send({ status: false, message: "Please enter price" });
+
+            if (!validator.isValidPrice(price)) return res.status(400).send({ status: false, message: "INVALID INPUT... price should be in numeric" });
+            obj.price = price
+        }
+
+        if (isFreeShipping || isFreeShipping == '') {
+
+            if (isFreeShipping !== 'true' && isFreeShipping !== 'false') return res.status(400).send({ status: false, message: "This field accepts only true and false" });
+            obj.isFreeShipping = isFreeShipping
+        }
+
+        if (productImage == '') return res.status(400).send({ status: false, message: "provide image to update profile picture" })
+
+        if (files && files.length > 0) {
+
+            if (files.length > 1) return res.status(400).send({ status: false, message: "one image file accepted only" })
+            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "INVALID INPUT... only image file accepted" }) }
+            let uploadedFileURL = await uploadFile(files[0])
+            obj.productImage = uploadedFileURL
+        }
+
+        if (style || style == '') {
+            if (!validator.isValidInput(style)) return res.status(400).send({ status: false, message: "Please enter style!" });
+            if (!validator.isValidName(style)) return res.status(400).send({ status: false, message: "INVALID INPUT... please provide a valid style" });
+            obj.style = style
+        }
+
+        if (availableSizes || availableSizes == '') {
+            if (!validator.isValidInput(availableSizes)) return res.status(400).send({ status: false, message: "Please enter Size" });
+            if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes)) return res.status(400).send({ status: false, message: 'INVALID INPUT... Selecte one of these given size option: (S , XS, M, X, L, XXL, XL) ' });
+            obj.availableSizes = availableSizes
+        }
+
+        if (installments || installments == '') {
+            if (!validator.isValidInput(installments)) return res.status(400).send({ status: false, message: "Please enter installments" });
+            if (!validator.isValidInstallment(installments)) return res.status(400).send({ status: false, message: "INVALID INPUT... Provide valid Installments number" });
+            obj.installments = installments
+        }
+
+        let updateProduct = await productModel.findOneAndUpdate({ isDeleted: false, _id: productId }, { $set: obj }, { new: true })
+
+        //-------------- Checking the Product is Present or Not --------------//
+        if (!updateProduct) { return res.status(404).send({ status: false, message: "Product is not found or Already Deleted!" }); }
+
+        return res.status(200).send({ status: true, message: "Success", data: updateProduct })
+
+    } catch (error) {
+
+        return res.status(500).send({ status: false, message: error.message })
+    }
+}
+
+//===================== [function for Delete Product Data] =====================//
+
+const deleteProduct = async (req, res) => {
+
+    try {
+
+        let productId = req.params.productId
+        if (!validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: `Given ProductId: ${productId} is invalid` })
+        let deletedProduct = await productModel.findOneAndUpdate({ isDeleted: false, _id: productId }, { isDeleted: true, deletedAt: Date.now() })
+
+        if (!deletedProduct) { return res.status(404).send({ status: false, message: "Product is not found or Already Deleted!" }) }
+
+        return res.status(200).send({ status: true, message: "Product Successfully Deleted." })
+
+    } catch (error) {
+
+        return res.status(500).send({ status: false, message: error.message })
+    }
+}
 
 
-module.exports = {createProduct, getProduct, getProductById}
+
+
+
+module.exports = {createProduct, getProduct, getProductById, updateProduct, deleteProduct}

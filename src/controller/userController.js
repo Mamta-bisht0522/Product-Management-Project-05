@@ -35,19 +35,19 @@ const createUser = async (req, res) => {
 
         //-------------------- Validations --------------------------//
         if (!validator.isValidInput(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
-        if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
+        if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'INVALID INPUT... fname accepts only Alphabets' }) }
 
         if (!validator.isValidInput(lname)) { return res.status(400).send({ status: false, message: 'Please enter lname' }) }
-        if (!validator.isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in Alphabets' }) }
+        if (!validator.isValidName(lname)) { return res.status(400).send({ status: false, message: 'INVALID INPUT... lname accepts only Alphabets' }) }
 
         if (!validator.isValidInput(email)) { return res.status(400).send({ status: false, message: 'Please enter the EmailId' }) }
-        if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: 'Please enter valid emailId' }) }
+        if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: 'INVALID INPUT... Please provide valid emailId' }) }
 
         if (!validator.isValidInput(phone)) { return res.status(400).send({ status: false, message: 'Please enter the Mobile Number' }) }
-        if (!validator.isValidMobileNumber(phone)) { return res.status(400).send({ status: false, message: 'Please enter valid Mobile Number' }) }
+        if (!validator.isValidMobileNumber(phone)) { return res.status(400).send({ status: false, message: 'INVALID INPUT... Please provide valid Mobile Number' }) }
 
         if (!validator.isValidInput(password)) { return res.status(400).send({ status: false, message: 'Please enter the password' }) }
-        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "To make strong Password Should be use 8 to 15 Characters which including letters, atleast one special character and at least one Number." }) }
+        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "Invalid Password Format. password can have minimum 8 character and max 15 character and must contains one number, one uppar alphabet, one lower alphabet and one special character" }) }
 
         if (!shipping) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
 
@@ -126,7 +126,7 @@ const userLogin = async function (req, res) {
         if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: "Invalid EmailID. Please input all letters in lowercase." }) }
 
         if (!validator.isValidInput(password)) return res.status(400).send({ status: false, message: "Password required to login" })
-        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "Invalid Password Format. password should be have minimum 8 character and max 15 character and must contains one uppar alphabet, one lower alphabet and one special character " }) }
+        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "Invalid Password Format. password should be have minimum 8 character and max 15 character and must contains one number, one uppar alphabet, one lower alphabet and one special character " }) }
 
         //-------------------- Fetching user's Data from DB -------------------//
         const userData = await userModel.findOne({ email: email })
@@ -223,7 +223,7 @@ const updateUserData = async function (req, res) {
             obj.phone = phone
         }
         if (password) {
-            if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "password should be have minimum 8 character and max 15 character and must contains one uppar alphabet, one lower alphabet and one special character" }) }
+            if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "password must contain minimum 8 character and max 15 character and one number, one uppar alphabet, one lower alphabet and one special character" }) }
             obj.password = await bcrypt.hash(password, 10)
         }
 
