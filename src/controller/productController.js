@@ -250,7 +250,7 @@ const updateProduct = async (req, res) => {
             obj.isFreeShipping = isFreeShipping
         }
 
-        if (productImage == '') return res.status(400).send({ status: false, message: "provide image to update profile picture" })
+        if (productImage == '') return res.status(400).send({ status: false, message: "provide image to update product picture" })
 
         if (files && files.length > 0) {
 
@@ -298,12 +298,13 @@ const deleteProduct = async (req, res) => {
     try {
 
         let productId = req.params.productId
+
         if (!validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: `Given ProductId: ${productId} is invalid` })
         let deletedProduct = await productModel.findOneAndUpdate({ isDeleted: false, _id: productId }, { isDeleted: true, deletedAt: Date.now() })
 
         if (!deletedProduct) { return res.status(404).send({ status: false, message: "Product is not found or Already Deleted!" }) }
 
-        return res.status(200).send({ status: true, message: "Product Successfully Deleted." })
+        return res.status(200).send({ status: true, message: "Product Successfully Deleted"})
 
     } catch (error) {
 

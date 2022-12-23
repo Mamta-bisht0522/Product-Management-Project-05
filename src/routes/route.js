@@ -3,6 +3,7 @@ const router = express.Router();
 const { Authentication, Authorization } = require('../middleware/auth')
 const { createUser, userLogin, getUser, updateUserData } = require('../controller/userController')
 const {createProduct, getProduct, getProductById, updateProduct, deleteProduct} = require('../controller/productController')
+const {createCart, updateCart, getCart, deleteCart} = require('../controller/cartController')
 
 
 router.get("/test", function (req, res){
@@ -27,6 +28,14 @@ router.get("/products/:productId", getProductById)
 router.put("/products/:productId", updateProduct)
 
 router.delete("/products/:productId", deleteProduct)
+
+router.post("/users/:userId/cart", Authentication, Authorization, createCart)
+
+router.put("/users/:userId/cart", Authentication, Authorization, updateCart)
+
+router.get("/users/:userId/cart", Authentication, Authorization, getCart)
+
+router.delete("/users/:userId/cart", Authentication, Authorization, deleteCart)
 
 
 router.all("/**",  (req, res) => {

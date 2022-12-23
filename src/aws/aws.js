@@ -7,7 +7,6 @@ AWS.config.update({
     region: "ap-south-1"
 })
 
-//===================== [function for Generate AWS S3 Link of File] =====================//
 let uploadFile = async (file) => {
     return new Promise(function (resolve, reject) {
         let s3 = new AWS.S3({ apiVersion: '2006-03-01' });
