@@ -38,8 +38,8 @@ router.get("/users/:userId/cart", Authentication, Authorization, getCart)
 
 router.delete("/users/:userId/cart", Authentication, Authorization, deleteCart)
 
-router.post("/users/:userId/orders",createOrder)
-router.put("/users/:userId/orders",updateOrder)
+router.post("/users/:userId/orders",Authentication, Authorization,createOrder)
+router.put("/users/:userId/orders",Authentication,Authentication,updateOrder)
 
 
 router.all("/**",  (req, res) => {

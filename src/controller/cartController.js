@@ -10,18 +10,20 @@ const createCart = async function (req,res){
     try{
         let data= req.body
         let userId= req.params.userId
-        // if(!isIdValid(userId))  res.status(400).send({status:false, message:"Invalid userId in path params"})
-        if(Object.keys(data).length==0) res.status(400).send({status:false, message:"Request body can not be empty"})
+        if (!validator.isValidObjectId(userId)) return res.status(400).send({status:false, message:`Given userId in parth param is not valid`})
 
-        let {productId}=data
+        let {productId, quantity, ...rest}=data
+
+        if (!validator.checkInput(data)) return res.status(400).send({status:false, message:`Please provide mandatory inputs i.e. productId and quantity`})
+        if (validator.checkInput(rest)) return res.status(400).send({status:false, message:`this field accepts only productId and quantity as input`})
 
         if(!productId ) res.status(400).send({status:false, message:"productId is mandatory in body"})
+        if (!validator.isValidObjectId(productId)) return res.status(400).send({status:false, message:`Given productId in body is not valid`})
     
-        if(data.quantity && typeof data.quantity!="number") res.status(400).send({status:false, message:"quantity is is only be a number"})
-        if(!(data.quantity)){ 
-            data.quantity=1
+        if(quantity && typeof quantity!="number") res.status(400).send({status:false, message:"quantity is is only be a number"})
+        if(!(quantity)){ 
+            quantity=1
         }
-        let {quantity}=data
         
        
        let useId = await userModel.findById(userId)
@@ -84,6 +86,7 @@ const createCart = async function (req,res){
        data.items=items
        data.totalPrice=(quantity) * (prodData.price)
        data.totalItems=items.length
+
        let cartDatas= await cartModel.create(data)
        
        return res.status(201).send({status:true,message:"Success",data:cartDatas})
@@ -94,7 +97,7 @@ const createCart = async function (req,res){
 }
 
 
-//<<<===================== This function is used for Update Cart Data =====================>>>//
+//===================== [function for Update Cart Data] =====================//
 const updateCart = async (req, res) => {
 
     try {
@@ -117,8 +120,8 @@ const updateCart = async (req, res) => {
         if (!validator.isValidInput(removeProduct)) { return res.status(400).send({ status: false, message: "RemoveProduct is Mandatory." }) }
         if (removeProduct != 0 && removeProduct != 1) { return res.status(400).send({ status: false, message: "RemoveProduct must be 0 or 1!" }) }
 
-        if (cartId || typeof cartId == 'string') {
-            if (!validator.isValidInput(cartId)) return res.status(400).send({ status: false, message: "Enter a valid cartId" });
+        if (cartId || cartId == '') {
+            if (!validator.isValidInput(cartId)) return res.status(400).send({ status: false, message: "please provide cartId" });
             if (!validator.isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "Please Enter Valid CartId" })
             if (findCart._id.toString() !== cartId) return res.status(400).send({ status: false, message: "This is not your CartId, Please enter correct CartId." })
         }

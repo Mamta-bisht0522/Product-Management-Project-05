@@ -200,29 +200,34 @@ const updateUserData = async function (req, res) {
 
         //--------------- Checking Mandotory Field --------------------//
         if (!(validator.checkInput(data)) && !(files)) return res.status(400).send({ status: false, message: "Atleast select one field Update from the list: (fname or lname or email or profileImage or phone or password or address)" });
-        if (validator.checkInput(rest)) { return res.status(400).send({ status: false, message: "Provide only fname or lname or email or profileImage or phone or password or address." }) }
+        if (validator.checkInput(rest)) { return res.status(400).send({ status: false, message: "Provide only fname or lname or email or profileImage or phone or password or address." })}
 
 
         let obj = {}
 
         //---------------------- Validations -----------------//
-        if (fname) {
-            if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
+        if (fname || fname == '') {
+            if (!validator.isValidInput(fname)) return res.status(400).send({ status: false, message: 'Please provide input for fname' })
+            if (!validator.isValidName(fname)) return res.status(400).send({ status: false, message: 'fname should be in Alphabets' })
             obj.fname = fname
         }
-        if (lname) {
-            if (!validator.isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in Alphabets' }) }
+        if (lname || lname == '') {
+            if (!validator.isValidInput(lname)) return res.status(400).send({ status: false, message: 'Please provide input for lname' })
+            if (!validator.isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in Alphabets' })}
             obj.lname = lname
         }
-        if (email) {
+        if (email || email == '') {
+            if (!validator.isValidInput(email)) return res.status(400).send({ status: false, message: 'Please provide input for email' })
             if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: 'Please enter valid emailId' }) }
             obj.email = email
         }
-        if (phone) {
+        if (phone || phone == '') {
+            if (!validator.isValidInput(phone)) return res.status(400).send({ status: false, message: 'Please provide input for phone' })
             if (!validator.isValidMobileNumber(phone)) { return res.status(400).send({ status: false, message: 'Please enter valid Mobile Number' }) }
             obj.phone = phone
         }
-        if (password) {
+        if (password || password== '') {
+            if (!validator.isValidInput(password)) return res.status(400).send({ status: false, message: 'Please provide input password' })
             if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "password must contain minimum 8 character and max 15 character and one number, one uppar alphabet, one lower alphabet and one special character" }) }
             obj.password = await bcrypt.hash(password, 10)
         }
@@ -236,7 +241,10 @@ const updateUserData = async function (req, res) {
         }
 
         //----------------- Validation of Shipping Address ------------------//
-        if (address) {
+    
+        if (address || address=='') {
+            if (!validator.isValidInput(address)) return res.status(400).send({ status: false, message: 'Please provide input for address' })
+            obj.address = JSON.parse(address)
             let { shipping, billing } = address
 
             if (shipping) {
