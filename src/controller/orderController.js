@@ -29,7 +29,7 @@ const createOrder = async(req,res)=>{
         obj.totalQuantity=quantity
 
         let orderCreate= await orderModel.create(obj)
-        res.status(201).send({status:true,message:" order Successfully Created",data:orderCreate})
+        res.status(201).send({status:true,message:"Success",data:orderCreate})
     }
     catch(err){
         return res.status(500).send({status:false,message:err.message})
@@ -55,7 +55,7 @@ const updateOrder = async function (req,res){
 
         let updateOrder=await orderModel.findOneAndUpdate({_id:orderId},{status:status},{new:true})
 
-        return res.status(200).send({status:true, msg:"successfully updated",data:updateOrder})
+        return res.status(200).send({status:true, message:"Success",data:updateOrder})
 
 
     }

@@ -126,7 +126,7 @@ const updateCart = async (req, res) => {
         if (!validator.isValidInput(productId)) return res.status(400).send({ status: false, message: "Please Enter productId" })
         if (!validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Please Enter Valid productId" })
 
-        let getProduct = await productModel.findOne({ _id: productId, isDeleted: false })
+        let getProduct = await productModel.findOne({ _id: productId})
         if (!getProduct) return res.status(404).send({ status: false, message: `No product found with this productId: '${productId}'.` })
 
         let getCart = await cartModel.findOne({ _id: findCart._id, 'items.productId': { $in: [productId] } })

@@ -88,9 +88,9 @@ const createUser = async (req, res) => {
 
             data.profileImage = await uploadFile(files[0])
         }
-        else {
-            return res.status(400).send({status: false, message: "Please provide image to complete profile" })
-        }
+        // else {
+        //     return res.status(400).send({status: false, message: "Please provide image to complete profile" })
+        // }
 
 
         
